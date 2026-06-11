@@ -1,0 +1,92 @@
+spring:
+  application:
+    name: toscana-communication-platform
+
+  # ── Datasource (PostgreSQL) ──────────────────────────────────────────────
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:toscana_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # ── JPA / Hibernate ──────────────────────────────────────────────────────
+  jpa:
+    hibernate:
+      ddl-auto: validate            # Use Flyway/Liquibase for schema management
+    show-sql: false
+    open-in-view: false             # MUST be false in a WebFlux context
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        default_batch_fetch_size: 100
+
+  # ── Redis ─────────────────────────────────────────────────────────────────
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+
+  # ── Caffeine Cache ────────────────────────────────────────────────────────
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=300s
+
+  # ── Thymeleaf (notification / email HTML templates) ───────────────────────
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false                    # Set to true in production
+
+  # ── Spring Cloud Stream ───────────────────────────────────────────────────
+  cloud:
+    stream:
+      default-binder: kafka         # Override per binding when needed
+      kafka:
+        binder:
+          brokers: ${KAFKA_BROKERS:localhost:9092}
+          auto-create-topics: true
+      rabbit:
+        binder:
+          addresses: ${RABBITMQ_ADDRESS:localhost:5672}
+          username: ${RABBITMQ_USERNAME:guest}
+          password: ${RABBITMQ_PASSWORD:guest}
+          virtual-host: /
+
+# ── Server ────────────────────────────────────────────────────────────────────
+server:
+  port: ${SERVER_PORT:8080}
+
+# ── Actuator ──────────────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+logging:
+  level:
+    com.clt.toscana: DEBUG
+    org.springframework.cloud.stream: INFO
+    org.springframework.data.redis: INFO
+    org.hibernate.SQL: DEBUG

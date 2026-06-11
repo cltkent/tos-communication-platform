@@ -1,0 +1,16 @@
+# ── Test profile: disable infrastructure auto-configs that need real servers ──
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  cloud:
+    stream:
+      default-binder: test          # spring-cloud-stream-test-binder (in-memory)
+
+logging:
+  level:
+    com.clt.toscana: DEBUG
